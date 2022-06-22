@@ -39,7 +39,7 @@ Promise.all([d3.json("links-sample.json"), d3.json("cases-sample.json")]).then(d
         .domain([0, 1])
         .range(["steelblue", "pink"]);
 
-
+    console.log(colorScale(1))
 
 
 
@@ -52,7 +52,7 @@ Promise.all([d3.json("links-sample.json"), d3.json("cases-sample.json")]).then(d
         .append("circle")
         .attr("r", 10)
         // .style("fill", "steelblue")
-        .style("fill", d => colorScale(d.class))
+        .style("fill", d => {if (d.gender == 'male') {return colorScale(0)} else {return colorScale(1)} })
         .call(d3.drag()
             .on("start", dragstarted)
             .on("drag", dragged)
