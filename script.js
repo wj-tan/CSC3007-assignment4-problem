@@ -12,6 +12,8 @@ Promise.all([d3.json("links-sample.json"), d3.json("cases-sample.json")]).then(d
         e.target = e.infectee;
     });
 
+    
+
     console.log(data[0]); //links
     console.log(data[1]); //cases
 
@@ -63,7 +65,7 @@ Promise.all([d3.json("links-sample.json"), d3.json("cases-sample.json")]).then(d
                 .html("Age: " + d.age + "<br>Gender: " + d.gender.charAt(0).toUpperCase() + "<br>Nationality: " + d.nationality + "<br>Occupation: " + d.occupation + "<br>Organization: " + d.organization + "<br>Vaccination Status: " + d.vaccinated)
                 .style("position", "absolute")
                 .style("background", "#fff")
-                .style("font-size", "50px")
+                .style("font-size", "25px")
                 .style("left", (event.pageX) + "px")
                 .style("top", (event.pageY) + "px")
                 .style("border", "solid")
@@ -112,10 +114,13 @@ Promise.all([d3.json("links-sample.json"), d3.json("cases-sample.json")]).then(d
 
 
     // Link Strcuture
+    // let xPosition = d3.scaleOrdinal()
+    //     .domain([0, 1, 2])
+    //     .range([150, 650]);
+
     let xPosition = d3.scaleOrdinal()
         .domain([0, 1, 2])
-        .range([150, 650]);
-
+        .range([150, 400, 650]);
 
     let linkpath = svg.append("g")
         .attr("id", "links")
@@ -130,7 +135,7 @@ Promise.all([d3.json("links-sample.json"), d3.json("cases-sample.json")]).then(d
     let simulation = d3.forceSimulation()
         .nodes(data[1])
         .force("x", d3.forceX().strength(0.5).x(d => xPosition(d.class)))
-        .force("y", d3.forceY().strength(0.1).y(height / 2))
+        .force("y", d3.forceY().strength(0.01).y(height / 2))
         // .force("link", d3.forceLink(links).id(d => d.id))
         .force("link", d3.forceLink(data[0])
             .id(d => d.id)
@@ -159,5 +164,30 @@ Promise.all([d3.json("links-sample.json"), d3.json("cases-sample.json")]).then(d
             //     .attr("y", d => d.y - 7.5);
 
         });
+
+    let vaccinationScale = d3.scaleOrdinal()
+        .domain([0, 1, 2])
+        .range([100, 300, 600]);
+
+    
+    // Sort by Vaccination status
+    var i = 0
+    data[1].forEach(d => {
+        if (i < 10) {
+            d.class = 0
+        } else {
+            d.class = 1
+        }
+        i++
+    })
+   
+    d3.select("#group1").on("click", function () {
+        simulation
+            .nodes(data[1])
+            .force("x", d3.forceX().strength(0.1).x(d => xPosition(d.class)))
+            .force("y", d3.forceY().strength(0.1).y(100))
+            .alphaTarget(0.3)
+            .restart();
+    })
 
 })
