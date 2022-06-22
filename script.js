@@ -42,12 +42,8 @@ Promise.all([d3.json("links-sample.json"), d3.json("cases-sample.json")]).then(d
 
     console.log(colorScale(1))
 
-
-
     // Add in circles
-
-
-    var pattern_def = svg.append("defs"); 
+    // var pattern_def = svg.append("defs");
     let node = svg.append("g")
         .attr("id", "nodes")
         .selectAll("circle")
@@ -61,7 +57,32 @@ Promise.all([d3.json("links-sample.json"), d3.json("cases-sample.json")]).then(d
         .call(d3.drag()
             .on("start", dragstarted)
             .on("drag", dragged)
-            .on("end", dragended));
+            .on("end", dragended))
+        .on("mouseover", (event, d) => {
+            d3.select(".tooltip")
+                .html("Age: " + d.age + "<br>Gender: " + d.gender.charAt(0).toUpperCase() + "<br>Nationality: " + d.nationality + "<br>Occupation: " + d.occupation + "<br>Organization: " + d.organization + "<br>Vaccination Status: " + d.vaccinated)
+                .style("position", "absolute")
+                .style("background", "#fff")
+                .style("font-size", "50px")
+                .style("left", (event.pageX) + "px")
+                .style("top", (event.pageY) + "px")
+                .style("border", "solid")
+                .style("border-width", "3px")
+                .style("border-radius", "5px")
+                .style("padding", "10px")
+                .style("opacity", 1);
+
+            let path = d3.select(event.currentTarget)
+            path.style("stroke", "orange").style("stroke-width", 2);
+        })
+        .on("mouseout", (event, d) => {
+            d3.select(".tooltip")
+                .text("")
+                .style("opacity", 0);
+
+            let path = d3.select(event.currentTarget)
+            path.style("stroke", "#fff").style("stroke-width", 0.5);
+        });
 
 
     // make groups
