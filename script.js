@@ -12,7 +12,7 @@ Promise.all([d3.json("links-sample.json"), d3.json("cases-sample.json")]).then(d
         e.target = e.infectee;
     });
 
-    
+
 
     console.log(data[0]); //links
     console.log(data[1]); //cases
@@ -46,6 +46,18 @@ Promise.all([d3.json("links-sample.json"), d3.json("cases-sample.json")]).then(d
 
     // Add in circles
     // var pattern_def = svg.append("defs");
+
+
+    let linkpath = svg.append("g")
+        .attr("id", "links")
+        .selectAll("path")
+        .data(data[0])
+        .enter()
+        .append("path")
+        .attr("fill", "none")
+        .attr("stroke", "black")
+        .attr("marker-end", "url(#end)");;
+
     let node = svg.append("g")
         .attr("id", "nodes")
         .selectAll("circle")
@@ -86,6 +98,21 @@ Promise.all([d3.json("links-sample.json"), d3.json("cases-sample.json")]).then(d
             path.style("stroke", "#fff").style("stroke-width", 0.5);
         });
 
+    
+    // Define the arrow look
+    svg.append("svg:defs").selectAll("marker")
+        .data(["end"])      // Different link/path types can be defined here
+        .enter().append("svg:marker")    // This section adds in the arrows
+        .attr("id", String)
+        .attr("viewBox", "0 -5 10 10")
+        .attr("refX", 29)
+        .attr("refY", 0.5)
+        .attr("markerWidth", 5)
+        .attr("markerHeight", 5)
+        .attr("orient", "auto")
+        .append("svg:path")
+        .attr("d", "M0,-5L10,0L0,5");
+
 
     // make groups
     // var node = svg.selectAll(".node")
@@ -105,7 +132,17 @@ Promise.all([d3.json("links-sample.json"), d3.json("cases-sample.json")]).then(d
 
 
     // Adding image href for nodes
-    node.append("image")
+
+    // let image = nodes.append("image")
+    // .data(data[1])
+    // .attr("xlink:href",  d => {
+    //     if (d.gender == 'male') { return "icons/male.svg" } else { return "icons/female.svg" }
+    // })
+    // .attr("width", 15)
+    // .attr("height", 15)
+    // .attr("pointer-events", "none");
+
+    let image = node.append("image")
         .data(data[1])
         .attr("xlink:href", d => { if (d.gender == 'male') { return "icons/male.svg" } else { return "icons/female.svg" } })
         .attr("width", 15)
@@ -122,14 +159,7 @@ Promise.all([d3.json("links-sample.json"), d3.json("cases-sample.json")]).then(d
         .domain([0, 1, 2])
         .range([150, 400, 650]);
 
-    let linkpath = svg.append("g")
-        .attr("id", "links")
-        .selectAll("path")
-        .data(data[0])
-        .enter()
-        .append("path")
-        .attr("fill", "none")
-        .attr("stroke", "black");
+    
 
 
     let simulation = d3.forceSimulation()
@@ -145,31 +175,31 @@ Promise.all([d3.json("links-sample.json"), d3.json("cases-sample.json")]).then(d
         .force("collide", d3.forceCollide().strength(0.1).radius(15))
         .on("tick", d => {
 
-            // node
-            //     // .attr("cx", d => d.x)
-            //     // .attr("cy", d => d.y)
-            //     .attr("transform", function (d) {
-            //         return "translate(" + d.x + "," + d.y + ")";
-            //     })
-
             node
-                .attr("cx", d => d.x)
-                .attr("cy", d => d.y);
+                // .attr("cx", d => d.x)
+                // .attr("cy", d => d.y)
+                .attr("transform", function (d) {
+                    return "translate(" + d.x + "," + d.y + ")";
+                })
+            // node
+            //     .attr("cx", d => d.x)
+            //     .attr("cy", d => d.y);
 
             linkpath
                 .attr("d", d => "M" + d.source.x + "," + d.source.y + " " + d.target.x + "," + d.target.y);
 
-            // image
-            //     .attr("x", d => d.x - 7.5)
-            //     .attr("y", d => d.y - 7.5);
-
+            image
+                .attr("x", d => d.x - 7.5)
+                .attr("y", d => d.y - 7.5);
         });
+
+    
 
     let vaccinationScale = d3.scaleOrdinal()
         .domain([0, 1, 2])
         .range([100, 300, 600]);
 
-    
+
     // Sort by Vaccination status
     var i = 0
     data[1].forEach(d => {
@@ -180,7 +210,7 @@ Promise.all([d3.json("links-sample.json"), d3.json("cases-sample.json")]).then(d
         }
         i++
     })
-   
+
     d3.select("#group1").on("click", function () {
         simulation
             .nodes(data[1])
